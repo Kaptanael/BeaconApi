@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using BeaconApi.Models;
 using Microsoft.AspNetCore.Http;
+using BeaconApi.Data;
 
 namespace BeaconApi
 {
@@ -26,10 +27,14 @@ namespace BeaconApi
         
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            //services.AddDbContext<BeaconDbContext>(options =>
+            //        options.UseSqlServer(Configuration.GetConnectionString("BeaconDbContext")));
 
-            services.AddDbContext<BeaconDbContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("BeaconDbContext")));
+            services.AddCors();
+
+            services.AddTransient(typeof(IBeaconRepository), typeof(BeaconRepository));
+
+            services.AddControllers();            
         }
         
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

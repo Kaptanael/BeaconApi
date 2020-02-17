@@ -15,35 +15,68 @@ namespace BeaconApi.Controllers
     [ApiController]
     public class BeaconsController : ControllerBase
     {
-        private readonly BeaconDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly BeaconDbContext _context;        
+        private readonly IBeaconRepository _beaconRepository;
 
-        public BeaconsController(BeaconDbContext context, IConfiguration configuration)
-        {
-            _context = context;
-            _configuration = configuration;
+        public BeaconsController(IBeaconRepository beaconRepository)
+        {                     
+            _beaconRepository = beaconRepository;
         }
-
+        
+        [Route("get-all")]
         [HttpGet]
-        public async Task<IActionResult> GetBeacon()
+        public IActionResult GetAllBeacon()
         {
-            var repo = new BeaconRepository(_configuration);
-            var recons = repo.GetAll();
-            return Ok(recons);
-            //return await _context.Beacon.ToListAsync();
+            var beaconsToReturn = _beaconRepository.GetAll();      
+            
+            return Ok(beaconsToReturn);            
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Beacon>> GetBeacon(Guid id)
+        [Route("get-by-uuid/{uuid}")]
+        [HttpGet]
+        public ActionResult<Beacon> GetBeaconByUUID(string uuid)
         {
-            var beacon = await _context.Beacon.FindAsync(id);
+            var beaconToReturn= _beaconRepository.GetBeaconByUUID(uuid);
 
-            if (beacon == null)
+            if (beaconToReturn == null)
             {
                 return NotFound();
             }
 
-            return beacon;
+            return beaconToReturn;
+        }
+
+        [Route("get-by-id/{guid}")]
+        [HttpGet]
+        public ActionResult<Beacon> GetBeaconById(string guid)
+        {
+            Guid validGuid;
+
+            bool isValid = Guid.TryParse(guid, out validGuid);
+
+            if (!isValid) 
+            {
+                BadRequest();
+            }
+
+            var beaconsToReturn = _beaconRepository.GetBeaconById(validGuid);
+
+            if (beaconsToReturn == null)
+            {
+                return NotFound();
+            }
+
+            return beaconsToReturn;
+        }
+
+        [Route("insert")]
+        [HttpPost]
+        public ActionResult InsertBeacon(Beacon beacon)
+        {
+            _context.Beacon.Add(beacon);
+            _beaconRepository.in
+
+            return CreatedAtAction("GetBeacon", new { id = beacon.GUID }, beacon);
         }
 
         [HttpPut("{id}")]

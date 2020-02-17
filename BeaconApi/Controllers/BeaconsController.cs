@@ -143,7 +143,7 @@ namespace BeaconApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBeacon(Guid id, Beacon beacon)
+        public async Task<IActionResult> UpdateBeacon(Guid id, Beacon beacon)
         {
             if (id != beacon.GUID)
             {

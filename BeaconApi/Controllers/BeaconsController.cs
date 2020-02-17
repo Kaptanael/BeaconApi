@@ -9,6 +9,7 @@ using BeaconApi.Models;
 using BeaconApi.Data;
 using Microsoft.Extensions.Configuration;
 using System.Net;
+using BeaconApi.Extensions;
 
 namespace BeaconApi.Controllers
 {
@@ -16,28 +17,53 @@ namespace BeaconApi.Controllers
     [ApiController]
     public class BeaconsController : ControllerBase
     {
-        private readonly BeaconDbContext _context;        
+        private readonly BeaconDbContext _context;
         private readonly IBeaconRepository _beaconRepository;
 
         public BeaconsController(IBeaconRepository beaconRepository)
-        {                     
+        {
             _beaconRepository = beaconRepository;
         }
-        
+
         [Route("get-all")]
         [HttpGet]
         public IActionResult GetAllBeacon()
         {
             try
             {
-                var beaconsToReturn = _beaconRepository.GetAll();
-
+                var Exception = new Exception("dasdasd");
+                Log.Write(Exception);
+                var beaconsToReturn = _beaconRepository.GetAll();                
                 return Ok(beaconsToReturn);
             }
             catch (Exception ex)
             {
+                Log.Write(ex);
                 return StatusCode(500);
-            }                   
+            }
+        }
+
+        [Route("get-beacon/{uuid}/{major}/{minor}")]
+        [HttpGet]
+        public ActionResult<Beacon> GetBeacon(string uuid, int major, int minor)
+        {
+
+            try
+            {
+                var beaconsToReturn = _beaconRepository.GetBeacon(uuid, major, minor);
+
+                if (beaconsToReturn == null)
+                {
+                    return NotFound();
+                }
+
+                return beaconsToReturn;
+            }
+            catch (Exception ex)
+            {
+                Log.Write(ex);
+                return StatusCode(500);
+            }
         }
 
         [Route("get-by-uuid/{uuid}")]
@@ -57,44 +83,46 @@ namespace BeaconApi.Controllers
             }
             catch (Exception ex)
             {
+                Log.Write(ex);
                 return StatusCode(500);
             }
         }
 
-        [Route("get-by-id/{guid}")]
+        [Route("get-by-guid/{guid}")]
         [HttpGet]
-        public ActionResult<Beacon> GetBeaconById(string guid)
+        public ActionResult<Beacon> GetBeaconByGuid(string guid)
         {
             Guid validGuid;
             bool isValid = Guid.TryParse(guid, out validGuid);
 
-            if (!isValid) 
+            if (!isValid)
             {
                 return BadRequest(guid);
             }
 
             try
             {
-                var beaconsToReturn = _beaconRepository.GetBeaconById(validGuid);
+                var beaconToReturn = _beaconRepository.GetBeaconByGuid(validGuid);
 
-                if (beaconsToReturn == null)
+                if (beaconToReturn == null)
                 {
                     return NotFound();
                 }
 
-                return beaconsToReturn;
+                return beaconToReturn;
             }
             catch (Exception ex)
             {
+                Log.Write(ex);
                 return StatusCode(500);
             }
-        }
+        }        
 
         [Route("insert")]
         [HttpPost]
         public ActionResult InsertBeacon(Beacon beacon)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return BadRequest(beacon);
             }
@@ -105,8 +133,9 @@ namespace BeaconApi.Controllers
             }
             catch (Exception ex)
             {
+                Log.Write(ex);
                 return StatusCode(500);
-            }            
+            }
 
             return Ok(HttpStatusCode.Created);
         }
@@ -125,7 +154,7 @@ namespace BeaconApi.Controllers
 
             try
             {
-                var beaconToReturn = _beaconRepository.GetBeaconById(validGuid);
+                var beaconToReturn = _beaconRepository.GetBeaconByGuid(validGuid);
 
                 if (beaconToReturn == null)
                 {
@@ -138,6 +167,7 @@ namespace BeaconApi.Controllers
             }
             catch (Exception ex)
             {
+                Log.Write(ex);
                 return StatusCode(500);
             }
         }

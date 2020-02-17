@@ -16,6 +16,10 @@ namespace BeaconApi.Models
 
         public string LongDescription { get; set; }
 
+        public int Major { get; set; }
+
+        public int Minor { get; set; }
+
         public string SVGHeight { get; set; }
 
         public string SVGWidth { get; set; }

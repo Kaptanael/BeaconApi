@@ -8,7 +8,9 @@ namespace BeaconApi.Data
     {
         List<Beacon> GetAll();
 
-        Beacon GetBeaconById(Guid guid);
+        Beacon GetBeaconByGuid(Guid guid);
+
+        Beacon GetBeacon(string uuid, int major, int minor);
 
         Beacon GetBeaconByUUID(string uuid);
 

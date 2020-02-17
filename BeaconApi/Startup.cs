@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using BeaconApi.Models;
 using Microsoft.AspNetCore.Http;
 using BeaconApi.Data;
+using BeaconApi.Extensions;
 
 namespace BeaconApi
 {
@@ -56,7 +57,7 @@ namespace BeaconApi
             });
 
             app.Run(async (context) =>
-            {
+            {                
                 await context.Response.WriteAsync("Resource Server has been started successfully");
             });
         }

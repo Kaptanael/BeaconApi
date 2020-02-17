@@ -21,31 +21,45 @@ namespace BeaconApi.Data
         }
         public List<Beacon> GetAll()
         {
-            List<Beacon> beaconList = new List<Beacon>();
+            List<Beacon> beacons = null;
             using (SqlConnection con = new SqlConnection(_connString))
             {
-                SqlCommand cmd = new SqlCommand("SELECT * FROM Beacon", con);
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Beacon ORDER BY GUID DESC", con);
                 cmd.CommandType = CommandType.Text;
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+
+                if (reader.HasRows)
                 {
-                    var beacon = new Beacon();
-                    beacon.GUID = new Guid(reader["GUID"].ToString());
-                    beacon.UUID = reader["UUID"].ToString();
-                    beacon.ShortDescription = reader["ShortDescription"].ToString();
-                    beacon.LongDescription = reader["LongDescription"].ToString();
-                    beacon.SVGHeight = reader["SVGHeight"].ToString();
-                    beacon.SVGWidth = reader["SVGWidth"].ToString();
-                    beacon.ThumbnailFilePath = reader["ThumbnailFilePath"].ToString();
-                    beacon.ImageFilePath = reader["ImageFilePath"].ToString();
-                    beacon.VideoFilePath = reader["VideoFilePath"].ToString();
-                    beaconList.Add(beacon);
+                    beacons = GetBeaconList(reader, out beacons);
                 }
             }
 
-            return beaconList;
+            return beacons;
+        }
+
+        public Beacon GetBeacon(string uuid, int major, int minor)
+        {
+            Beacon beacon = null;
+            using (SqlConnection con = new SqlConnection(_connString))
+            {
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Beacon WHERE UUID=@UUID AND Major=@Major AND Minor=@Minor", con);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("UUID", uuid);
+                cmd.Parameters.AddWithValue("Major", major);
+                cmd.Parameters.AddWithValue("Minor", minor);
+                con.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    beacon = GetBeacon(reader, out beacon);
+                }
+            }
+
+            return beacon;
         }
 
         public Beacon GetBeaconByUUID(string uuid)
@@ -59,25 +73,17 @@ namespace BeaconApi.Data
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+
+                if (reader.HasRows)
                 {
-                    beacon = new Beacon();
-                    beacon.GUID = new Guid(reader["GUID"].ToString());
-                    beacon.UUID = reader["UUID"].ToString();
-                    beacon.ShortDescription = reader["ShortDescription"].ToString();
-                    beacon.LongDescription = reader["LongDescription"].ToString();
-                    beacon.SVGHeight = reader["SVGHeight"].ToString();
-                    beacon.SVGWidth = reader["SVGWidth"].ToString();
-                    beacon.ThumbnailFilePath = reader["ThumbnailFilePath"].ToString();
-                    beacon.ImageFilePath = reader["ImageFilePath"].ToString();
-                    beacon.VideoFilePath = reader["VideoFilePath"].ToString();
+                    beacon = GetBeacon(reader, out beacon);
                 }
             }
 
             return beacon;
         }
 
-        public Beacon GetBeaconById(Guid guid)
+        public Beacon GetBeaconByGuid(Guid guid)
         {
             Beacon beacon = null;
             using (SqlConnection con = new SqlConnection(_connString))
@@ -88,18 +94,10 @@ namespace BeaconApi.Data
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+
+                if (reader.HasRows)
                 {
-                    beacon = new Beacon();
-                    beacon.GUID = new Guid(reader["GUID"].ToString());
-                    beacon.UUID = reader["UUID"].ToString();
-                    beacon.ShortDescription = reader["ShortDescription"].ToString();
-                    beacon.LongDescription = reader["LongDescription"].ToString();
-                    beacon.SVGHeight = reader["SVGHeight"].ToString();
-                    beacon.SVGWidth = reader["SVGWidth"].ToString();
-                    beacon.ThumbnailFilePath = reader["ThumbnailFilePath"].ToString();
-                    beacon.ImageFilePath = reader["ImageFilePath"].ToString();
-                    beacon.VideoFilePath = reader["VideoFilePath"].ToString();
+                    beacon = GetBeacon(reader, out beacon);
                 }
             }
 
@@ -108,17 +106,19 @@ namespace BeaconApi.Data
 
         public bool Insert(Beacon beacon)
         {
-            int result = 0;            
+            int result = 0;
             using (SqlConnection con = new SqlConnection(_connString))
             {
-                SqlCommand cmd = new SqlCommand("INSERT INTO Beacon(UUID,ShortDescription,LongDescription,SVGHeight,SVGWidth,ThumbnailFilePath,ImageFilePath,VideoFilePath) " +
-                                                " Values(@UUID,@ShortDescription,@LongDescription,@SVGHeight,@SVGWidth,@ThumbnailFilePath,@ImageFilePath,@VideoFilePath)", con);
+                SqlCommand cmd = new SqlCommand("INSERT INTO Beacon(UUID,ShortDescription,LongDescription,SVGHeight,SVGWidth,Major,Minor,ThumbnailFilePath,ImageFilePath,VideoFilePath) " +
+                                                " Values(@UUID,@ShortDescription,@LongDescription,@SVGHeight,@SVGWidth,@Major,@Minor,@ThumbnailFilePath,@ImageFilePath,@VideoFilePath)", con);
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("UUID", beacon.UUID);
                 cmd.Parameters.AddWithValue("ShortDescription", beacon.ShortDescription);
                 cmd.Parameters.AddWithValue("LongDescription", beacon.LongDescription);
                 cmd.Parameters.AddWithValue("SVGHeight", beacon.SVGHeight);
                 cmd.Parameters.AddWithValue("SVGWidth", beacon.SVGWidth);
+                cmd.Parameters.AddWithValue("Major", beacon.Major);
+                cmd.Parameters.AddWithValue("Minor", beacon.Minor);
                 cmd.Parameters.AddWithValue("ThumbnailFilePath", beacon.ThumbnailFilePath);
                 cmd.Parameters.AddWithValue("ImageFilePath", beacon.ImageFilePath);
                 cmd.Parameters.AddWithValue("VideoFilePath", beacon.VideoFilePath);
@@ -136,12 +136,58 @@ namespace BeaconApi.Data
             {
                 SqlCommand cmd = new SqlCommand("DELETE FROM Beacon WHERE GUID=@GUID", con);
                 cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("GUID", guid);                
+                cmd.Parameters.AddWithValue("GUID", guid);
                 con.Open();
                 result = cmd.ExecuteNonQuery();
             }
 
             return result > 0 ? true : false;
+        }
+
+        private Beacon GetBeacon(SqlDataReader reader, out Beacon beacon)
+        {
+            beacon = new Beacon();
+
+            while (reader.Read())
+            {
+                beacon.GUID = new Guid(reader["GUID"].ToString());
+                beacon.UUID = reader.GetString(reader.GetOrdinal("UUID"));
+                beacon.ShortDescription = reader.GetString(reader.GetOrdinal("ShortDescription"));
+                beacon.LongDescription = reader.GetString(reader.GetOrdinal("LongDescription"));
+                beacon.Major = reader.GetInt32(reader.GetOrdinal("Major"));
+                beacon.Minor = reader.GetInt32(reader.GetOrdinal("Minor"));
+                beacon.SVGHeight = reader.IsDBNull("SVGHeight") ? null : reader.GetString(reader.GetOrdinal("SVGHeight"));
+                beacon.SVGWidth = reader.IsDBNull("SVGWidth") ? null : reader.GetString(reader.GetOrdinal("SVGWidth"));
+                beacon.ThumbnailFilePath = reader.IsDBNull("ThumbnailFilePath") ? null : reader.GetString(reader.GetOrdinal("ThumbnailFilePath"));
+                beacon.ImageFilePath = reader.IsDBNull("ImageFilePath") ? null : reader.GetString(reader.GetOrdinal("ImageFilePath"));
+                beacon.VideoFilePath = reader.IsDBNull("VideoFilePath") ? null : reader.GetString(reader.GetOrdinal("VideoFilePath"));
+            }
+
+            return beacon;
+        }
+
+        private List<Beacon> GetBeaconList(SqlDataReader reader, out List<Beacon> beacons)
+        {
+            beacons = new List<Beacon>();
+
+            while (reader.Read())
+            {
+                var beacon = new Beacon();
+                beacon.GUID = new Guid(reader["GUID"].ToString());
+                beacon.UUID = reader.GetString(reader.GetOrdinal("UUID"));
+                beacon.ShortDescription = reader.GetString(reader.GetOrdinal("ShortDescription"));
+                beacon.LongDescription = reader.GetString(reader.GetOrdinal("LongDescription"));
+                beacon.Major = reader.GetInt32(reader.GetOrdinal("Major"));
+                beacon.Minor = reader.GetInt32(reader.GetOrdinal("Minor"));
+                beacon.SVGHeight = reader.IsDBNull("SVGHeight") ? null : reader.GetString(reader.GetOrdinal("SVGHeight"));
+                beacon.SVGWidth = reader.IsDBNull("SVGWidth") ? null : reader.GetString(reader.GetOrdinal("SVGWidth"));
+                beacon.ThumbnailFilePath = reader.IsDBNull("ThumbnailFilePath") ? null : reader.GetString(reader.GetOrdinal("ThumbnailFilePath"));
+                beacon.ImageFilePath = reader.IsDBNull("ImageFilePath") ? null : reader.GetString(reader.GetOrdinal("ImageFilePath"));
+                beacon.VideoFilePath = reader.IsDBNull("VideoFilePath") ? null : reader.GetString(reader.GetOrdinal("VideoFilePath"));
+                beacons.Add(beacon);
+            }
+
+            return beacons;
         }
     }
 }

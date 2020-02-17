@@ -30,9 +30,7 @@ namespace BeaconApi.Controllers
         public IActionResult GetAllBeacon()
         {
             try
-            {
-                var Exception = new Exception("dasdasd");
-                Log.Write(Exception);
+            {                
                 var beaconsToReturn = _beaconRepository.GetAll();                
                 return Ok(beaconsToReturn);
             }

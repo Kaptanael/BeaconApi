@@ -111,7 +111,8 @@ namespace BeaconApi.Data
             int result = 0;            
             using (SqlConnection con = new SqlConnection(_connString))
             {
-                SqlCommand cmd = new SqlCommand("INSERT INTO Beacon", con);
+                SqlCommand cmd = new SqlCommand("INSERT INTO Beacon(UUID,ShortDescription,LongDescription,SVGHeight,SVGWidth,ThumbnailFilePath,ImageFilePath,VideoFilePath) " +
+                                                " Values(@UUID,@ShortDescription,@LongDescription,@SVGHeight,@SVGWidth,@ThumbnailFilePath,@ImageFilePath,@VideoFilePath)", con);
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("UUID", beacon.UUID);
                 cmd.Parameters.AddWithValue("ShortDescription", beacon.ShortDescription);
@@ -121,6 +122,21 @@ namespace BeaconApi.Data
                 cmd.Parameters.AddWithValue("ThumbnailFilePath", beacon.ThumbnailFilePath);
                 cmd.Parameters.AddWithValue("ImageFilePath", beacon.ImageFilePath);
                 cmd.Parameters.AddWithValue("VideoFilePath", beacon.VideoFilePath);
+                con.Open();
+                result = cmd.ExecuteNonQuery();
+            }
+
+            return result > 0 ? true : false;
+        }
+
+        public bool Delete(Guid guid)
+        {
+            int result = 0;
+            using (SqlConnection con = new SqlConnection(_connString))
+            {
+                SqlCommand cmd = new SqlCommand("DELETE FROM Beacon WHERE GUID=@GUID", con);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("GUID", guid);                
                 con.Open();
                 result = cmd.ExecuteNonQuery();
             }

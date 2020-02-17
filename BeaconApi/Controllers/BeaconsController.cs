@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BeaconApi.Models;
 using BeaconApi.Data;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace BeaconApi.Controllers
 {
@@ -27,23 +28,37 @@ namespace BeaconApi.Controllers
         [HttpGet]
         public IActionResult GetAllBeacon()
         {
-            var beaconsToReturn = _beaconRepository.GetAll();      
-            
-            return Ok(beaconsToReturn);            
+            try
+            {
+                var beaconsToReturn = _beaconRepository.GetAll();
+
+                return Ok(beaconsToReturn);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }                   
         }
 
         [Route("get-by-uuid/{uuid}")]
         [HttpGet]
         public ActionResult<Beacon> GetBeaconByUUID(string uuid)
         {
-            var beaconToReturn= _beaconRepository.GetBeaconByUUID(uuid);
-
-            if (beaconToReturn == null)
+            try
             {
-                return NotFound();
-            }
+                var beaconToReturn = _beaconRepository.GetBeaconByUUID(uuid);
 
-            return beaconToReturn;
+                if (beaconToReturn == null)
+                {
+                    return NotFound();
+                }
+
+                return beaconToReturn;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
 
         [Route("get-by-id/{guid}")]
@@ -51,32 +66,80 @@ namespace BeaconApi.Controllers
         public ActionResult<Beacon> GetBeaconById(string guid)
         {
             Guid validGuid;
-
             bool isValid = Guid.TryParse(guid, out validGuid);
 
             if (!isValid) 
             {
-                BadRequest();
+                return BadRequest(guid);
             }
 
-            var beaconsToReturn = _beaconRepository.GetBeaconById(validGuid);
-
-            if (beaconsToReturn == null)
+            try
             {
-                return NotFound();
-            }
+                var beaconsToReturn = _beaconRepository.GetBeaconById(validGuid);
 
-            return beaconsToReturn;
+                if (beaconsToReturn == null)
+                {
+                    return NotFound();
+                }
+
+                return beaconsToReturn;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
 
         [Route("insert")]
         [HttpPost]
         public ActionResult InsertBeacon(Beacon beacon)
         {
-            _context.Beacon.Add(beacon);
-            _beaconRepository.in
+            if (!ModelState.IsValid) 
+            {
+                return BadRequest(beacon);
+            }
 
-            return CreatedAtAction("GetBeacon", new { id = beacon.GUID }, beacon);
+            try
+            {
+                _beaconRepository.Insert(beacon);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }            
+
+            return Ok(HttpStatusCode.Created);
+        }
+
+        [Route("delete/{guid}")]
+        [HttpDelete]
+        public ActionResult DeleteBeacon(string guid)
+        {
+            Guid validGuid;
+            bool isValid = Guid.TryParse(guid, out validGuid);
+
+            if (!isValid)
+            {
+                return BadRequest(guid);
+            }
+
+            try
+            {
+                var beaconToReturn = _beaconRepository.GetBeaconById(validGuid);
+
+                if (beaconToReturn == null)
+                {
+                    return NotFound();
+                }
+
+                _beaconRepository.Delete(validGuid);
+
+                return Ok(HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
 
         [HttpPut("{id}")]
@@ -106,30 +169,6 @@ namespace BeaconApi.Controllers
             }
 
             return NoContent();
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Beacon>> PostBeacon(Beacon beacon)
-        {
-            _context.Beacon.Add(beacon);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetBeacon", new { id = beacon.GUID }, beacon);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Beacon>> DeleteBeacon(Guid id)
-        {
-            var beacon = await _context.Beacon.FindAsync(id);
-            if (beacon == null)
-            {
-                return NotFound();
-            }
-
-            _context.Beacon.Remove(beacon);
-            await _context.SaveChangesAsync();
-
-            return beacon;
         }
 
         private bool BeaconExists(Guid id)

@@ -218,8 +218,8 @@ namespace BeaconApi.Data
                 beacon.Major = reader.GetInt32(reader.GetOrdinal("Major"));
                 beacon.Minor = reader.GetInt32(reader.GetOrdinal("Minor"));
                 beacon.SVGHeight = reader.IsDBNull("SVGHeight") ? null : reader.GetString(reader.GetOrdinal("SVGHeight"));
-                beacon.SVGWidth = reader.IsDBNull("SVGWidth") ? null : reader.GetString(reader.GetOrdinal("SVGWidth"));
-                beacon.ThumbnailImageBinary = reader.IsDBNull("ThumbnailImageBinary") ? null : Encoding.ASCII.GetBytes(reader.GetString(reader.GetOrdinal("ThumbnailImageBinary")));                
+                beacon.SVGWidth = reader.IsDBNull("SVGWidth") ? null : reader.GetString(reader.GetOrdinal("SVGWidth"));                
+                beacon.ThumbnailImageBinary = reader.IsDBNull("ThumbnailImageBinary") ? null : (byte[])reader["ThumbnailImageBinary"];
                 beacons.Add(beacon);
             }
 

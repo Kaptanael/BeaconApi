@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using BeaconWeb.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace BeaconWeb.Controllers
 {
@@ -16,18 +18,18 @@ namespace BeaconWeb.Controllers
             {
                 client.BaseAddress = new Uri("http://localhost:5000/api/beacons/");
                 
-                var responseTask = client.GetAsync("get-all");
-                responseTask.Wait();
-
-                var result = responseTask.Result;
-                if (result.IsSuccessStatusCode)
+                var response = client.GetAsync("get-all").Result;
+                
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    var readTask = result.Content.ReadAsStringAsync();
-                    readTask.Wait();                    
+                    var reaconResponse = response.Content.ReadAsStringAsync().Result;
+                    
+                    var beacons = JsonConvert.DeserializeObject<List<BeaconViewModel>>(reaconResponse);
                 }
                 else 
                 {
-                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                    ModelState.AddModelError(string.Empty, "Server error.");
                 }
             }
             return View();

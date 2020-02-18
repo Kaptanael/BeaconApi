@@ -17,6 +17,16 @@ namespace BeaconApi.Services
             _beaconImageRepository = beaconImageRepository;
         }
 
+        public BeaconImage GetBeaconImageByGuid(Guid guid)
+        {
+            return _beaconImageRepository.GetBeaconImageByGuid(guid);
+        }
+
+        public List<BeaconImage> GetBeaconImageByBeaconGuid(Guid guid)
+        {
+            return _beaconImageRepository.GetBeaconImageByBeaconGuid(guid);
+        }
+
         public bool Insert(BeaconImageForCreateDto beaconImageForCreateDto)
         {
             Guid beaconGuid;

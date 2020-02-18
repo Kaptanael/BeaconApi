@@ -24,6 +24,35 @@ namespace BeaconApi.Controllers
             _beaconImageService = beaconImageService;
         }
 
+        [Route("get-beacon-image/{uuid}")]
+        [HttpGet]
+        public ActionResult<List<BeaconImage>> GetBeaconImageByUUID(string guid)
+        {
+            Guid validUUID;
+            bool isValid = Guid.TryParse(guid, out validUUID);
+
+            if (!isValid)
+            {
+                return BadRequest(guid);
+            }
+            try
+            {
+                var beaconImagesToReturn = _beaconImageService.GetBeaconImageByBeaconGuid(validUUID);
+
+                if (beaconImagesToReturn == null)
+                {
+                    return NotFound();
+                }
+
+                return beaconImagesToReturn;
+            }
+            catch (Exception ex)
+            {
+                Log.Write(ex);
+                return StatusCode(500);
+            }
+        }
+
         [Route("insert")]
         [HttpPost]
         public ActionResult InsertBeaconImage(BeaconImageForCreateDto beaconImageForCreateDto)

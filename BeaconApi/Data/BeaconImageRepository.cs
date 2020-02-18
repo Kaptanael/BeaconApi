@@ -46,7 +46,7 @@ namespace BeaconApi.Data
             return result > 0 ? true : false;
         }
 
-        public List<BeaconImage> GetBeaconImageByUUID(Guid guid)
+        public List<BeaconImage> GetBeaconImageByBeaconGuid(Guid guid)
         {
             List<BeaconImage> beaconImages = null;
 
@@ -99,7 +99,7 @@ namespace BeaconApi.Data
                 var beaconImage = new BeaconImage();
                 beaconImage.BeaconImageID = new Guid(reader["BeaconImageID"].ToString());
                 beaconImage.BeaconGUID = new Guid(reader["BeaconGUID"].ToString());
-                beaconImage.BeaconImageBinary = Encoding.ASCII.GetBytes(reader.GetString(reader.GetOrdinal("BeaconImageBinary")));
+                beaconImage.BeaconImageBinary = reader.IsDBNull("BeaconImageBinary") ? null : (byte[])reader["BeaconImageBinary"]; 
                 beaconImages.Add(beaconImage);
             }
 
@@ -114,7 +114,7 @@ namespace BeaconApi.Data
             {
                 beaconImage.BeaconImageID = new Guid(reader["BeaconImageID"].ToString());
                 beaconImage.BeaconGUID = new Guid(reader["BeaconGUID"].ToString());
-                beaconImage.BeaconImageBinary = Encoding.ASCII.GetBytes(reader.GetString(reader.GetOrdinal("BeaconImageBinary")));
+                beaconImage.BeaconImageBinary = reader.IsDBNull("BeaconImageBinary") ? null : (byte[])reader["BeaconImageBinary"];
             }
 
             return beaconImage;

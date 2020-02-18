@@ -9,6 +9,6 @@ namespace BeaconApi.Dtos.BeaconImage
     {
         public string BeaconGUID { get; set; }
 
-        public string BeaconImage { get; set; }
+        public string BeaconImageBinary { get; set; }
     }
 }

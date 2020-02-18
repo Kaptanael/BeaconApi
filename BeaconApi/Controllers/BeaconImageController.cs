@@ -7,6 +7,7 @@ using BeaconApi.Data;
 using BeaconApi.Dtos.BeaconImage;
 using BeaconApi.Extensions;
 using BeaconApi.Models;
+using BeaconApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,11 +17,11 @@ namespace BeaconApi.Controllers
     [ApiController]
     public class BeaconImageController : ControllerBase
     {        
-        private readonly IBeaconImageRepository _beaconImageRepository;
+        private readonly IBeaconImageService _beaconImageService;
 
-        public BeaconImageController(IBeaconImageRepository beaconImageRepository)
+        public BeaconImageController(IBeaconImageService beaconImageService)
         {
-            _beaconImageRepository = beaconImageRepository;
+            _beaconImageService = beaconImageService;
         }
 
         [Route("insert")]
@@ -34,7 +35,7 @@ namespace BeaconApi.Controllers
 
             try
             {
-                //_beaconImageRepository.Insert(beaconImageForCreateDto);
+                _beaconImageService.Insert(beaconImageForCreateDto);
             }
             catch (Exception ex)
             {

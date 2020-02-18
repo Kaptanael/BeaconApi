@@ -33,10 +33,9 @@ namespace BeaconApi.Data
 
             using (SqlConnection con = new SqlConnection(ConnString))
             {
-                SqlCommand cmd = new SqlCommand("INSERT INTO [dbo].[BeaconImage](BeaconImageID,BeaconGUID,BeaconImageBinary) " +
-                                                " Values(@BeaconImageID,@BeaconGUID,@BeaconImageBinary)", con);
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("BeaconImageID", beacon.BeaconImageID);
+                SqlCommand cmd = new SqlCommand("INSERT INTO [dbo].[BeaconImage](BeaconGUID,BeaconImageBinary) " +
+                                                " Values(@BeaconGUID,@BeaconImageBinary)", con);
+                cmd.CommandType = CommandType.Text;                
                 cmd.Parameters.AddWithValue("BeaconGUID", beacon.BeaconGUID);
                 cmd.Parameters.AddWithValue("BeaconImageBinary", beacon.BeaconImageBinary);
                 con.Open();

@@ -11,28 +11,35 @@ namespace BeaconApi.Data
 {
     public class BeaconRepository : IBeaconRepository
     {
-        private readonly IConfiguration _configuration;
-        private readonly string _connString;
+        private readonly IConfiguration _configuration;        
 
         public BeaconRepository(IConfiguration configuration)
         {
-            _configuration = configuration;
-            _connString = _configuration.GetConnectionString("BeaconDbContext");
+            _configuration = configuration;            
+        }
+
+        private string ConnString
+        {
+            get
+            {
+                return _configuration.GetConnectionString("BeaconDbContext");
+            }
         }
         public List<Beacon> GetAll()
         {
             List<Beacon> beacons = null;
-            using (SqlConnection con = new SqlConnection(_connString))
+
+            using (SqlConnection con = new SqlConnection(ConnString))
             {
                 SqlCommand cmd = new SqlCommand("SELECT * FROM Beacon ORDER BY GUID DESC", con);
                 cmd.CommandType = CommandType.Text;
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
-
+                
                 if (reader.HasRows)
                 {
-                    beacons = GetBeaconList(reader, out beacons);
+                    beacons = GetBeaconList(reader);
                 }
             }
 
@@ -42,20 +49,21 @@ namespace BeaconApi.Data
         public Beacon GetBeacon(string uuid, int major, int minor)
         {
             Beacon beacon = null;
-            using (SqlConnection con = new SqlConnection(_connString))
+
+            using (SqlConnection con = new SqlConnection(ConnString))
             {
                 SqlCommand cmd = new SqlCommand("SELECT * FROM Beacon WHERE UUID=@UUID AND Major=@Major AND Minor=@Minor", con);
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("UUID", uuid);
                 cmd.Parameters.AddWithValue("Major", major);
-                cmd.Parameters.AddWithValue("Minor", minor);
+                cmd.Parameters.AddWithValue("Minor", minor);                
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.HasRows)
                 {
-                    beacon = GetBeacon(reader, out beacon);
+                    beacon = GetBeacon(reader);
                 }
             }
 
@@ -65,18 +73,19 @@ namespace BeaconApi.Data
         public Beacon GetBeaconByUUID(string uuid)
         {
             Beacon beacon = null;
-            using (SqlConnection con = new SqlConnection(_connString))
+
+            using (SqlConnection con = new SqlConnection(ConnString))
             {
                 SqlCommand cmd = new SqlCommand("SELECT * FROM Beacon WHERE UUID=@UUID", con);
                 cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("UUID", uuid);
+                cmd.Parameters.AddWithValue("UUID", uuid);                
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.HasRows)
                 {
-                    beacon = GetBeacon(reader, out beacon);
+                    beacon = GetBeacon(reader);
                 }
             }
 
@@ -86,18 +95,19 @@ namespace BeaconApi.Data
         public Beacon GetBeaconByGuid(Guid guid)
         {
             Beacon beacon = null;
-            using (SqlConnection con = new SqlConnection(_connString))
+
+            using (SqlConnection con = new SqlConnection(ConnString))
             {
                 SqlCommand cmd = new SqlCommand("SELECT * FROM Beacon WHERE GUID=@GUID", con);
                 cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("GUID", guid);
+                cmd.Parameters.AddWithValue("GUID", guid);                
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.HasRows)
                 {
-                    beacon = GetBeacon(reader, out beacon);
+                    beacon = GetBeacon(reader);
                 }
             }
 
@@ -107,7 +117,8 @@ namespace BeaconApi.Data
         public bool Insert(Beacon beacon)
         {
             int result = 0;
-            using (SqlConnection con = new SqlConnection(_connString))
+
+            using (SqlConnection con = new SqlConnection(ConnString))
             {
                 SqlCommand cmd = new SqlCommand("INSERT INTO Beacon(UUID,ShortDescription,LongDescription,SVGHeight,SVGWidth,Major,Minor,ThumbnailFilePath,ImageFilePath,VideoFilePath) " +
                                                 " Values(@UUID,@ShortDescription,@LongDescription,@SVGHeight,@SVGWidth,@Major,@Minor,@ThumbnailFilePath,@ImageFilePath,@VideoFilePath)", con);
@@ -123,6 +134,7 @@ namespace BeaconApi.Data
                 cmd.Parameters.AddWithValue("ImageFilePath", beacon.ImageFilePath);
                 cmd.Parameters.AddWithValue("VideoFilePath", beacon.VideoFilePath);
                 con.Open();
+
                 result = cmd.ExecuteNonQuery();
             }
 
@@ -132,12 +144,14 @@ namespace BeaconApi.Data
         public bool Delete(Guid guid)
         {
             int result = 0;
-            using (SqlConnection con = new SqlConnection(_connString))
+
+            using (SqlConnection con = new SqlConnection(ConnString))
             {
                 SqlCommand cmd = new SqlCommand("DELETE FROM Beacon WHERE GUID=@GUID", con);
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("GUID", guid);
                 con.Open();
+
                 result = cmd.ExecuteNonQuery();
             }
 
@@ -147,7 +161,8 @@ namespace BeaconApi.Data
         public bool BeaconExists(string uuid,int major, int minor)
         {
             int count = 0;
-            using (SqlConnection con = new SqlConnection(_connString))
+
+            using (SqlConnection con = new SqlConnection(ConnString))
             {
                 SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Beacon WHERE UUID=@UUID AND Major=@Major AND Minor=@Minor", con);
                 cmd.CommandType = CommandType.Text;
@@ -155,22 +170,23 @@ namespace BeaconApi.Data
                 cmd.Parameters.AddWithValue("Major", major);
                 cmd.Parameters.AddWithValue("Minor", minor);
                 con.Open();
+
                 count = Convert.ToInt32(cmd.ExecuteScalar());                
             }
 
             return count > 0 ? true : false;
         }
 
-        private Beacon GetBeacon(SqlDataReader reader, out Beacon beacon)
+        private Beacon GetBeacon(SqlDataReader reader)
         {
-            beacon = new Beacon();
+            var beacon = new Beacon();
 
             while (reader.Read())
             {
                 beacon.GUID = new Guid(reader["GUID"].ToString());
                 beacon.UUID = reader.GetString(reader.GetOrdinal("UUID"));
                 beacon.ShortDescription = reader.GetString(reader.GetOrdinal("ShortDescription"));
-                beacon.LongDescription = reader.GetString(reader.GetOrdinal("LongDescription"));
+                beacon.LongDescription = reader.IsDBNull("LongDescription") ? null : reader.GetString(reader.GetOrdinal("LongDescription"));
                 beacon.Major = reader.GetInt32(reader.GetOrdinal("Major"));
                 beacon.Minor = reader.GetInt32(reader.GetOrdinal("Minor"));
                 beacon.SVGHeight = reader.IsDBNull("SVGHeight") ? null : reader.GetString(reader.GetOrdinal("SVGHeight"));
@@ -183,9 +199,9 @@ namespace BeaconApi.Data
             return beacon;
         }
 
-        private List<Beacon> GetBeaconList(SqlDataReader reader, out List<Beacon> beacons)
+        private List<Beacon> GetBeaconList(SqlDataReader reader)
         {
-            beacons = new List<Beacon>();
+            var beacons = new List<Beacon>();
 
             while (reader.Read())
             {
@@ -193,7 +209,7 @@ namespace BeaconApi.Data
                 beacon.GUID = new Guid(reader["GUID"].ToString());
                 beacon.UUID = reader.GetString(reader.GetOrdinal("UUID"));
                 beacon.ShortDescription = reader.GetString(reader.GetOrdinal("ShortDescription"));
-                beacon.LongDescription = reader.GetString(reader.GetOrdinal("LongDescription"));
+                beacon.LongDescription = reader.IsDBNull("LongDescription") ? null : reader.GetString(reader.GetOrdinal("LongDescription"));
                 beacon.Major = reader.GetInt32(reader.GetOrdinal("Major"));
                 beacon.Minor = reader.GetInt32(reader.GetOrdinal("Minor"));
                 beacon.SVGHeight = reader.IsDBNull("SVGHeight") ? null : reader.GetString(reader.GetOrdinal("SVGHeight"));

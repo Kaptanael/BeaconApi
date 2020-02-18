@@ -10,6 +10,8 @@ using BeaconApi.Data;
 using Microsoft.Extensions.Configuration;
 using System.Net;
 using BeaconApi.Extensions;
+using BeaconApi.Dtos.Beacon;
+using System.Text;
 
 namespace BeaconApi.Controllers
 {
@@ -30,8 +32,8 @@ namespace BeaconApi.Controllers
         public IActionResult GetAllBeacon()
         {
             try
-            {                
-                var beaconsToReturn = _beaconRepository.GetAll();                
+            {
+                var beaconsToReturn = _beaconRepository.GetAll();
                 return Ok(beaconsToReturn);
             }
             catch (Exception ex)
@@ -113,19 +115,31 @@ namespace BeaconApi.Controllers
                 Log.Write(ex);
                 return StatusCode(500);
             }
-        }        
+        }
 
         [Route("insert")]
         [HttpPost]
-        public ActionResult InsertBeacon(Beacon beacon)
+        public ActionResult InsertBeacon(BeaconForCreateDto beaconForCreateDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(beacon);
+                return BadRequest(beaconForCreateDto);
             }
 
             try
             {
+                var beacon = new Beacon
+                {
+                    UUID = beaconForCreateDto.UUID,
+                    ShortDescription = beaconForCreateDto.ShortDescription,
+                    LongDescription = beaconForCreateDto.LongDescription,
+                    Major = beaconForCreateDto.Major,
+                    Minor = beaconForCreateDto.Minor,
+                    SVGHeight = beaconForCreateDto.SVGHeight,
+                    SVGWidth = beaconForCreateDto.SVGWidth,
+                    ThumbnailImageBinary = Encoding.ASCII.GetBytes(beaconForCreateDto.ThumbnailImageBinary)
+                };
+
                 _beaconRepository.Insert(beacon);
             }
             catch (Exception ex)

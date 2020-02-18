@@ -34,6 +34,7 @@ namespace BeaconApi
             services.AddCors();
 
             services.AddTransient(typeof(IBeaconRepository), typeof(BeaconRepository));
+            services.AddTransient(typeof(IBeaconImageRepository), typeof(BeaconImageRepository));
 
             services.AddControllers();            
         }

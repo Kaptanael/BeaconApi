@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BeaconApi.Models
+namespace BeaconApi.Dtos.Beacon
 {
-    public class Beacon
-    {        
+    public class BeaconForListDto
+    {
         public Guid GUID { get; set; }
 
         public string UUID { get; set; }
@@ -24,7 +23,7 @@ namespace BeaconApi.Models
 
         public string SVGWidth { get; set; }
 
-        public byte[] ThumbnailImageBinary { get; set; }       
-
+        public string ThumbnailImageBinary { get; set; }
+        
     }
 }

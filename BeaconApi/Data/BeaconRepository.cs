@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace BeaconApi.Data
@@ -120,8 +121,8 @@ namespace BeaconApi.Data
 
             using (SqlConnection con = new SqlConnection(ConnString))
             {
-                SqlCommand cmd = new SqlCommand("INSERT INTO Beacon(UUID,ShortDescription,LongDescription,SVGHeight,SVGWidth,Major,Minor,ThumbnailFilePath,ImageFilePath,VideoFilePath) " +
-                                                " Values(@UUID,@ShortDescription,@LongDescription,@SVGHeight,@SVGWidth,@Major,@Minor,@ThumbnailFilePath,@ImageFilePath,@VideoFilePath)", con);
+                SqlCommand cmd = new SqlCommand("INSERT INTO Beacon(UUID,ShortDescription,LongDescription,SVGHeight,SVGWidth,Major,Minor,ThumbnailImageBinary) " +
+                                                " Values(@UUID,@ShortDescription,@LongDescription,@SVGHeight,@SVGWidth,@Major,@Minor,@ThumbnailImageBinary)", con);
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("UUID", beacon.UUID);
                 cmd.Parameters.AddWithValue("ShortDescription", beacon.ShortDescription);
@@ -130,9 +131,7 @@ namespace BeaconApi.Data
                 cmd.Parameters.AddWithValue("SVGWidth", beacon.SVGWidth);
                 cmd.Parameters.AddWithValue("Major", beacon.Major);
                 cmd.Parameters.AddWithValue("Minor", beacon.Minor);
-                cmd.Parameters.AddWithValue("ThumbnailFilePath", beacon.ThumbnailFilePath);
-                cmd.Parameters.AddWithValue("ImageFilePath", beacon.ImageFilePath);
-                cmd.Parameters.AddWithValue("VideoFilePath", beacon.VideoFilePath);
+                cmd.Parameters.AddWithValue("ThumbnailImageBinary", beacon.ThumbnailImageBinary);
                 con.Open();
 
                 result = cmd.ExecuteNonQuery();
@@ -191,9 +190,7 @@ namespace BeaconApi.Data
                 beacon.Minor = reader.GetInt32(reader.GetOrdinal("Minor"));
                 beacon.SVGHeight = reader.IsDBNull("SVGHeight") ? null : reader.GetString(reader.GetOrdinal("SVGHeight"));
                 beacon.SVGWidth = reader.IsDBNull("SVGWidth") ? null : reader.GetString(reader.GetOrdinal("SVGWidth"));
-                beacon.ThumbnailFilePath = reader.IsDBNull("ThumbnailFilePath") ? null : reader.GetString(reader.GetOrdinal("ThumbnailFilePath"));
-                beacon.ImageFilePath = reader.IsDBNull("ImageFilePath") ? null : reader.GetString(reader.GetOrdinal("ImageFilePath"));
-                beacon.VideoFilePath = reader.IsDBNull("VideoFilePath") ? null : reader.GetString(reader.GetOrdinal("VideoFilePath"));
+                beacon.ThumbnailImageBinary = reader.IsDBNull("ThumbnailImageBinary") ? null : Encoding.ASCII.GetBytes(reader.GetString(reader.GetOrdinal("ThumbnailImageBinary")));
             }
 
             return beacon;
@@ -214,9 +211,7 @@ namespace BeaconApi.Data
                 beacon.Minor = reader.GetInt32(reader.GetOrdinal("Minor"));
                 beacon.SVGHeight = reader.IsDBNull("SVGHeight") ? null : reader.GetString(reader.GetOrdinal("SVGHeight"));
                 beacon.SVGWidth = reader.IsDBNull("SVGWidth") ? null : reader.GetString(reader.GetOrdinal("SVGWidth"));
-                beacon.ThumbnailFilePath = reader.IsDBNull("ThumbnailFilePath") ? null : reader.GetString(reader.GetOrdinal("ThumbnailFilePath"));
-                beacon.ImageFilePath = reader.IsDBNull("ImageFilePath") ? null : reader.GetString(reader.GetOrdinal("ImageFilePath"));
-                beacon.VideoFilePath = reader.IsDBNull("VideoFilePath") ? null : reader.GetString(reader.GetOrdinal("VideoFilePath"));
+                beacon.ThumbnailImageBinary = reader.IsDBNull("ThumbnailImageBinary") ? null : Encoding.ASCII.GetBytes(reader.GetString(reader.GetOrdinal("ThumbnailImageBinary")));                
                 beacons.Add(beacon);
             }
 

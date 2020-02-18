@@ -10,20 +10,20 @@ using System.Threading.Tasks;
 
 namespace BeaconApi.Data
 {
-    public class BeaconImageRepository
+    public class BeaconImageRepository : IBeaconImageRepository
     {
-        private readonly IConfiguration _configuration;        
+        private readonly IConfiguration _configuration;
 
         public BeaconImageRepository(IConfiguration configuration)
         {
-            _configuration = configuration;            
+            _configuration = configuration;
         }
 
-        private string ConnString 
+        private string ConnString
         {
-            get 
-            { 
-                return _configuration.GetConnectionString("BeaconDbContext"); 
+            get
+            {
+                return _configuration.GetConnectionString("BeaconDbContext");
             }
         }
 
@@ -59,6 +59,7 @@ namespace BeaconApi.Data
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
+
                 if (reader.HasRows)
                 {
                     beaconImages = GetBeaconImages(reader);
@@ -80,6 +81,7 @@ namespace BeaconApi.Data
                 con.Open();
 
                 SqlDataReader reader = cmd.ExecuteReader();
+
                 if (reader.HasRows)
                 {
                     beaconImage = GetBeaconImage(reader);
@@ -110,10 +112,10 @@ namespace BeaconApi.Data
             var beaconImage = new BeaconImage();
 
             while (reader.Read())
-            {                
+            {
                 beaconImage.BeaconImageID = new Guid(reader["BeaconImageID"].ToString());
                 beaconImage.BeaconGUID = new Guid(reader["BeaconGUID"].ToString());
-                beaconImage.BeaconImageBinary = Encoding.ASCII.GetBytes(reader.GetString(reader.GetOrdinal("BeaconImageBinary")));                
+                beaconImage.BeaconImageBinary = Encoding.ASCII.GetBytes(reader.GetString(reader.GetOrdinal("BeaconImageBinary")));
             }
 
             return beaconImage;

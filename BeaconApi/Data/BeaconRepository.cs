@@ -126,12 +126,20 @@ namespace BeaconApi.Data
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("UUID", beacon.UUID);
                 cmd.Parameters.AddWithValue("ShortDescription", beacon.ShortDescription);
-                cmd.Parameters.AddWithValue("LongDescription", beacon.LongDescription);
-                cmd.Parameters.AddWithValue("SVGHeight", beacon.SVGHeight);
-                cmd.Parameters.AddWithValue("SVGWidth", beacon.SVGWidth);
+                cmd.Parameters.AddWithValue("LongDescription", string.IsNullOrEmpty(beacon.LongDescription) ? (object)DBNull.Value : beacon.LongDescription);
+                cmd.Parameters.AddWithValue("SVGHeight", string.IsNullOrEmpty(beacon.SVGHeight) ? (object)DBNull.Value : beacon.SVGHeight);
+                cmd.Parameters.AddWithValue("SVGWidth", string.IsNullOrEmpty(beacon.SVGWidth) ? (object)DBNull.Value : beacon.SVGWidth);
                 cmd.Parameters.AddWithValue("Major", beacon.Major);
                 cmd.Parameters.AddWithValue("Minor", beacon.Minor);
-                cmd.Parameters.AddWithValue("ThumbnailImageBinary", beacon.ThumbnailImageBinary);
+                if (beacon.ThumbnailImageBinary != null)
+                {
+                    cmd.Parameters.AddWithValue("ThumbnailImageBinary", beacon.ThumbnailImageBinary);
+                }
+                else 
+                {
+                    cmd.Parameters.Add("ThumbnailImageBinary", SqlDbType.VarBinary, -1).Value = DBNull.Value;                   
+                }
+                
                 con.Open();
 
                 result = cmd.ExecuteNonQuery();

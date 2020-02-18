@@ -14,6 +14,7 @@ using BeaconApi.Models;
 using Microsoft.AspNetCore.Http;
 using BeaconApi.Data;
 using BeaconApi.Extensions;
+using BeaconApi.Services;
 
 namespace BeaconApi
 {
@@ -35,6 +36,7 @@ namespace BeaconApi
 
             services.AddTransient(typeof(IBeaconRepository), typeof(BeaconRepository));
             services.AddTransient(typeof(IBeaconImageRepository), typeof(BeaconImageRepository));
+            services.AddTransient(typeof(IBeaconService), typeof(BeaconService));
 
             services.AddControllers();            
         }

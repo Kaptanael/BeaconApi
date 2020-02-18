@@ -12,6 +12,7 @@ using System.Net;
 using BeaconApi.Extensions;
 using BeaconApi.Dtos.Beacon;
 using System.Text;
+using BeaconApi.Services;
 
 namespace BeaconApi.Controllers
 {
@@ -21,10 +22,12 @@ namespace BeaconApi.Controllers
     {
         private readonly BeaconDbContext _context;
         private readonly IBeaconRepository _beaconRepository;
+        private readonly IBeaconService _beaconService;
 
-        public BeaconsController(IBeaconRepository beaconRepository)
+        public BeaconsController(IBeaconRepository beaconRepository, IBeaconService beaconService)
         {
             _beaconRepository = beaconRepository;
+            _beaconService = beaconService;
         }
 
         [Route("get-all")]
@@ -128,19 +131,7 @@ namespace BeaconApi.Controllers
 
             try
             {
-                var beacon = new Beacon
-                {
-                    UUID = beaconForCreateDto.UUID,
-                    ShortDescription = beaconForCreateDto.ShortDescription,
-                    LongDescription = beaconForCreateDto.LongDescription,
-                    Major = beaconForCreateDto.Major,
-                    Minor = beaconForCreateDto.Minor,
-                    SVGHeight = beaconForCreateDto.SVGHeight,
-                    SVGWidth = beaconForCreateDto.SVGWidth,
-                    ThumbnailImageBinary = Encoding.ASCII.GetBytes(beaconForCreateDto.ThumbnailImageBinary)
-                };
-
-                _beaconRepository.Insert(beacon);
+                _beaconService.Insert(beaconForCreateDto);
             }
             catch (Exception ex)
             {

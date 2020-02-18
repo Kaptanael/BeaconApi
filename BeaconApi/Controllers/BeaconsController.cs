@@ -45,7 +45,6 @@ namespace BeaconApi.Controllers
         [HttpGet]
         public ActionResult<Beacon> GetBeacon(string uuid, int major, int minor)
         {
-
             try
             {
                 var beaconsToReturn = _beaconRepository.GetBeacon(uuid, major, minor);
@@ -170,6 +169,7 @@ namespace BeaconApi.Controllers
             }
         }
 
+        [Route("update")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBeacon(Guid id, Beacon beacon)
         {

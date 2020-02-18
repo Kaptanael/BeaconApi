@@ -17,5 +17,7 @@ namespace BeaconApi.Data
         bool Insert(Beacon beacon);
 
         bool Delete(Guid guid);
+
+        bool BeaconExists(string uuid, int major, int minor);
     }
 }

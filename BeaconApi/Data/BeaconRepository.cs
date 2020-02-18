@@ -144,6 +144,23 @@ namespace BeaconApi.Data
             return result > 0 ? true : false;
         }
 
+        public bool BeaconExists(string uuid,int major, int minor)
+        {
+            int count = 0;
+            using (SqlConnection con = new SqlConnection(_connString))
+            {
+                SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Beacon WHERE UUID=@UUID AND Major=@Major AND Minor=@Minor", con);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("UUID", uuid);
+                cmd.Parameters.AddWithValue("Major", major);
+                cmd.Parameters.AddWithValue("Minor", minor);
+                con.Open();
+                count = Convert.ToInt32(cmd.ExecuteScalar());                
+            }
+
+            return count > 0 ? true : false;
+        }
+
         private Beacon GetBeacon(SqlDataReader reader, out Beacon beacon)
         {
             beacon = new Beacon();
